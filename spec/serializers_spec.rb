@@ -520,6 +520,54 @@ b: 2
     end
   end
 
+
+  describe 'XML platform operations' do
+    let(:xml_doc) { '<books><book id="1"><price>42</price></book><book id="2"><price>10</price></book></books>' }
+    let(:xsl) do
+      '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">' \
+        '<xsl:template match="/"><out><xsl:value-of select="count(//book)"/></out></xsl:template></xsl:stylesheet>'
+    end
+    let(:rng) do
+      '<element name="books" xmlns="http://relaxng.org/ns/structure/1.0">' \
+        '<zeroOrMore><element name="book"><optional><attribute name="id"><text/></attribute></optional>' \
+        '<element name="price"><text/></element></element></zeroOrMore></element>'
+    end
+
+    it 'leptris evaluates XQuery, transforms, and validates' do
+      adapter = Serialbench::Serializers::Xml::LeptrisSerializer.instance
+      skip 'leptris unavailable' unless adapter.available?
+
+      doc = adapter.parse(xml_doc)
+      expect(adapter.xquery_eval(doc, '//book[price > 30]')).to eq(1)
+      expect(adapter.xslt_transform(doc, xsl)).to include('<out>2</out>')
+      expect(adapter.validate(doc, rng)).to be true
+    end
+
+    it 'nokogiri transforms and validates' do
+      adapter = Serialbench::Serializers::Xml::NokogiriSerializer.instance
+      doc = adapter.parse(xml_doc)
+      expect(adapter.xslt_transform(doc, xsl)).to include('<out>2</out>')
+      expect(adapter.validate(doc, rng)).to be true
+    end
+  end
+
+  describe 'HTML adapters' do
+    let(:html_doc) { '<html><body><table><tr><td>a</td></tr></table></body></html>' }
+
+    it 'round-trips HTML through every available adapter' do
+      [Serialbench::Serializers::Html::NokogiriSerializer,
+       Serialbench::Serializers::Html::OgaSerializer,
+       Serialbench::Serializers::Html::LeptrisSerializer].each do |cls|
+        adapter = cls.instance
+        next unless adapter.available?
+
+        parsed = adapter.parse(html_doc)
+        expect(adapter.serialize_document(parsed)).to include('<td>a</td>')
+        expect(adapter.capabilities).to include(:parse, :generate)
+      end
+    end
+  end
+
   describe 'BenchmarkRunner' do
     let(:benchmark_config) do
       Serialbench::Models::BenchmarkConfig.new.tap do |config|
