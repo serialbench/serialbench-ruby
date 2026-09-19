@@ -170,7 +170,7 @@ _DEFAULT_XSLT30_STYLESHEET = <<'XSL30'.freeze
 </xsl:stylesheet>
 XSL30
 
-    XPATH_QUERIES = ['//book', "//book[@id='101']", '//book[price > 30]/title'].freeze
+    XPATH_QUERIES = ['//user | //record', "//user[@id='101']", '//preferences/theme'].freeze
     XQUERY_EXPRESSIONS = ['count(//user | //record)', "//record[@id='101']/data/field1", '//user[profile/age > 40]/name'].freeze
     RNG_SCHEMA = File.expand_path('test_data/schema.rng', Dir.pwd).then { |p| File.exist?(p) ? File.read(p) : _DEFAULT_RNG_SCHEMA }
     XSLT_STYLESHEET = File.expand_path('test_data/transform.xsl', Dir.pwd).then { |p| File.exist?(p) ? File.read(p) : _DEFAULT_XSLT_STYLESHEET }
