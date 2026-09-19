@@ -9,6 +9,7 @@ module Serialbench
 
     def initialize(config)
       @config = config
+      require 'cbor'
     end
 
     def load
@@ -23,7 +24,7 @@ module Serialbench
 
     def fixture_file(size, format)
       path = "test_data/#{size}.#{format}"
-      File.read(path) if File.exist?(path)
+      File.binread(path) if File.exist?(path)
     end
 
     def generate(key)
@@ -43,8 +44,23 @@ module Serialbench
       when 'medium.html' then generate_medium_html
       when 'large.toml' then generate_large_toml
       when 'large.html' then generate_large_html
+      when 'small.cbor' then generate_small_cbor
+      when 'medium.cbor' then generate_medium_cbor
+      when 'large.cbor' then generate_large_cbor
       else raise ArgumentError, "no test data generator for #{key}"
       end
+    end
+
+    def generate_small_cbor
+      small_test_data_structure.to_cbor
+    end
+
+    def generate_medium_cbor
+      medium_test_data_structure.to_cbor
+    end
+
+    def generate_large_cbor
+      large_test_data_structure.to_cbor
     end
 
     # Shared data structure generators

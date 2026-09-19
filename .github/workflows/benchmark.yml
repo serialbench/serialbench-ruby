@@ -179,6 +179,41 @@ jobs:
         run: .github/scripts/push-to-data.sh json ${{ matrix.ruby-version }} ${{ matrix.platform }}
         shell: bash
 
+      - name: Benchmark cbor
+        continue-on-error: true
+        shell: bash
+        env:
+          GITHUB_RUNNER_PLATFORM: ${{ matrix.platform }}
+          DATA_REPO_TOKEN: ${{ secrets.DATA_REPO_TOKEN }}
+          DATA_RUN_DATE: ${{ needs.setup.outputs.run-date }}
+        run: |
+          if [ "${{ github.run_attempt }}" -gt 1 ] && .github/scripts/format-status.sh cbor ${{ matrix.ruby-version }} ${{ matrix.platform }}; then
+            echo "cbor already in the data repo — skipping (gap-filling rerun)"
+            exit 0
+          fi
+          bundle exec serialbench environment execute \
+            config/environments/ci-ruby-${{ matrix.ruby-version }}.yml \
+            config/benchmarks/full-cbor.yml \
+            "results/runs/ci-ruby-${{ matrix.ruby-version }}-${{ matrix.platform }}/cbor"
+
+      - name: Upload cbor
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.platform }}-ruby-${{ matrix.ruby-version }}-cbor
+          path: results/runs/ci-ruby-${{ matrix.ruby-version }}-${{ matrix.platform }}/cbor
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Push cbor to data repo
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          DATA_REPO_TOKEN: ${{ secrets.DATA_REPO_TOKEN }}
+          DATA_RUN_DATE: ${{ needs.setup.outputs.run-date }}
+        run: .github/scripts/push-to-data.sh cbor ${{ matrix.ruby-version }} ${{ matrix.platform }}
+        shell: bash
+
       - name: Benchmark yaml
         continue-on-error: true
         shell: bash
@@ -331,7 +366,7 @@ jobs:
           DATA_RUN_DATE: ${{ needs.setup.outputs.run-date }}
         run: |
           MISSING=""
-          for FMT in json yaml toml html xml; do
+          for FMT in json yaml toml html xml cbor; do
             if .github/scripts/format-status.sh "$FMT" "${{ matrix.ruby-version }}" "${{ matrix.platform }}"; then
               echo "$FMT: in data repo"
             else

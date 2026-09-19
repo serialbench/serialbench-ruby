@@ -13,8 +13,9 @@ unless Gem.win_platform? && RUBY_PLATFORM.include?('aarch64')
 end
 
 gem 'leptris', '1.9.193.4'  # html5 conformance campaign + memchr tokenizer perf
-gem 'yeptris', '0.6.5.4'    # compiled plan walk; dump round-trip fixed (plain keys)
+gem 'yeptris', '0.6.7.5'    # CBOR load/dump (dump segfaults on FFI ladder, yeptris-ruby#152)
 gem 'teptris', '0.2.36'     # full platform matrix incl. mingw - windows coverage unblocked
+gem 'cbor'                  # RFC 7049 CBOR codec
 gem 'benchmark'  # Removed from stdlib in Ruby 4.0
 gem 'base64'  # Required for Ruby 3.4+
 gem 'lutaml-model', '~> 0.7'

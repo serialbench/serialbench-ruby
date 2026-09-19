@@ -33,6 +33,11 @@ require_relative 'serializers/yaml/psych_serializer'
 require_relative 'serializers/yaml/syck_serializer'
 require_relative 'serializers/yaml/yeptris_serializer'
 
+# CBOR Serializers
+require_relative 'serializers/cbor/base_cbor_serializer'
+require_relative 'serializers/cbor/cbor_serializer'
+require_relative 'serializers/cbor/yeptris_serializer'
+
 # TOML Serializers
 require_relative 'serializers/toml/base_toml_serializer'
 require_relative 'serializers/toml/toml_rb_serializer'
@@ -75,6 +80,10 @@ module Serialbench
         Toml::TomlibSerializer,
         Toml::TomlrbSerializer,
         Toml::TeptrisSerializer
+      ],
+      cbor: [
+        Cbor::CborSerializer,
+        Cbor::YeptrisSerializer
       ]
     }.freeze
 

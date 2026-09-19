@@ -1,0 +1,23 @@
+# Per-format split of full.yml: each format runs in its own process so
+# memory profiling of large documents cannot compound across formats.
+name: full-cbor
+
+data_sizes:
+- small
+- medium
+- large
+
+formats:
+- cbor
+
+iterations:
+  small: 10
+  medium: 3
+  large: 1
+
+operations:
+- parsing
+- generation
+- memory
+
+warmup: 2
