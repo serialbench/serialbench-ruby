@@ -38,17 +38,22 @@ put_file() {
     -H "Authorization: Bearer ${DATA_TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     "https://api.github.com/repos/serialbench/data/contents/${TARGET_PATH}" \
-    "${sha_arg[@]}"
+    "${sha_arg[@]}" || echo 000
+}
+
+# Sha of the existing data file, empty on any failure — guarded so a dead
+# pipe (curl -f, grep miss, SIGPIPE under pipefail) cannot kill the leg.
+fetch_sha() {
+  curl -s -H "Authorization: Bearer ${DATA_TOKEN}" \
+    "https://api.github.com/repos/serialbench/data/contents/${TARGET_PATH}" \
+    | grep -m1 -oE '"sha": ?"[a-f0-9]{40}"' | grep -oE '[a-f0-9]{40}' || true
 }
 
 HTTP_CODE=$(put_file "")
 for TRY in 1 2 3 4 5; do
   if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then break; fi
   if [ "$HTTP_CODE" = "409" ] || [ "$HTTP_CODE" = "422" ]; then
-    SHA=$(curl -sf \
-      -H "Authorization: Bearer ${DATA_TOKEN}" \
-      "https://api.github.com/repos/serialbench/data/contents/${TARGET_PATH}" \
-      | grep -oE '"sha":\s*"[a-f0-9]+"' | head -1 | grep -oE '[a-f0-9]{40}')
+    SHA=$(fetch_sha)
     [ -z "$SHA" ] && break
     echo "attempt $TRY got $HTTP_CODE — refetching sha and retrying"
     sleep $((TRY * 3))
@@ -65,10 +70,7 @@ elif [ "$HTTP_CODE" = "422" ]; then
   # moves between fetch and put) is retried with a fresh sha.
   UPDATE_CODE=409
   for TRY in 1 2 3; do
-    SHA=$(curl -sf \
-      -H "Authorization: Bearer ${DATA_TOKEN}" \
-      "https://api.github.com/repos/serialbench/data/contents/${TARGET_PATH}" \
-      | grep -oE '"sha":\s*"[a-f0-9]+"' | head -1 | grep -oE '[a-f0-9]{40}')
+    SHA=$(fetch_sha)
     if [ -z "$SHA" ]; then
       echo "::warning::422 but couldn't get sha for ${TARGET_PATH}"
       break
