@@ -10,8 +10,11 @@ module Serialbench
           'leptris'
         end
 
+        # 1.9.201 defaults parse_html to the :html4 engine — the
+        # libxml2/Nokogiri-compatible shape. The conformant engine is
+        # benchmarked separately as leptris-whatwg.
         def capabilities
-          super | Set.new(%i[xpath html5])
+          super | Set.new(%i[xpath])
         end
 
         def parse(html_string)

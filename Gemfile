@@ -12,7 +12,7 @@ unless Gem.win_platform? && RUBY_PLATFORM.include?('aarch64')
   gem 'libxml-ruby'
 end
 
-gem 'leptris', '1.9.193.4'  # html5 conformance campaign + memchr tokenizer perf
+gem 'leptris', '1.9.201.2'  # parse_html defaults :html4 (nokogiri-parity); :whatwg priced separately
 gem 'yeptris', '0.6.7.5'    # CBOR load/dump (dump segfaults on FFI ladder, yeptris-ruby#152)
 gem 'teptris', '0.2.36'     # full platform matrix incl. mingw - windows coverage unblocked
 gem 'cbor'                  # RFC 7049 CBOR codec

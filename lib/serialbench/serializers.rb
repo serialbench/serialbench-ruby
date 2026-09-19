@@ -18,6 +18,7 @@ require_relative 'serializers/html/base_html_serializer'
 require_relative 'serializers/html/nokogiri_serializer'
 require_relative 'serializers/html/oga_serializer'
 require_relative 'serializers/html/leptris_serializer'
+require_relative 'serializers/html/leptris_whatwg_serializer'
 
 # JSON Serializers
 require_relative 'serializers/json/base_json_serializer'
@@ -68,7 +69,8 @@ module Serialbench
       html: [
         Html::NokogiriSerializer,
         Html::OgaSerializer,
-        Html::LeptrisSerializer
+        Html::LeptrisSerializer,
+        Html::LeptrisWhatwgSerializer
       ],
       yaml: [
         Yaml::PsychSerializer,
