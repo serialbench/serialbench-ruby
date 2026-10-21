@@ -39,7 +39,7 @@ RSpec.describe Serialbench::Serializers::Cbor do
       expect(decoded).to be_a(Hash)
     end
 
-    it 'is parse-only while dump segfaults upstream' do
+    it 'is parse-only while dump mis-encodes exponent-notation strings' do
       skip 'yeptris CBOR unavailable' unless serializer.available?
 
       expect(serializer.supports?(:parse)).to be(true)

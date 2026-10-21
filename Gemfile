@@ -12,13 +12,13 @@ unless Gem.win_platform? && RUBY_PLATFORM.include?('aarch64')
   gem 'libxml-ruby'
 end
 
-gem 'leptris', '1.9.201.2'  # parse_html defaults :html4 (nokogiri-parity); :whatwg priced separately
-gem 'yeptris', '0.6.7.5'    # CBOR load/dump (dump segfaults on FFI ladder, yeptris-ruby#152)
-gem 'teptris', '0.2.36'     # full platform matrix incl. mingw - windows coverage unblocked
+gem 'leptris', '1.9.379.0'  # parse_html defaults :html4 (nokogiri-parity); :whatwg priced separately
+gem 'yeptris', '0.6.34.3'   # JSON load/dump; CBOR parse-only until #293 ships (fix branch validated; 0.6.34.3 is a version bump only)
+gem 'teptris', '0.3.6.3'    # 0.3.x line (native-doc API); Teptris::TOML.load/dump unchanged
 gem 'cbor'                  # RFC 7049 CBOR codec
 gem 'benchmark'  # Removed from stdlib in Ruby 4.0
 gem 'base64'  # Required for Ruby 3.4+
-gem 'lutaml-model', '~> 0.7'
+gem 'lutaml-model', '~> 0.8'
 gem 'octokit'
 gem 'rake'
 gem 'rspec'

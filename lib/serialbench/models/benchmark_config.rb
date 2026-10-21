@@ -48,7 +48,7 @@ module Serialbench
       attribute :name, :string
       attribute :description, :string
       attribute :data_sizes, :string, collection: true, values: %w[small medium large]
-      attribute :formats, :string, collection: true, values: %w[xml html json yaml toml]
+      attribute :formats, :string, collection: true, values: %w[xml html json yaml toml cbor]
       attribute :iterations, BenchmarkIteration
       attribute :warmup, :integer, default: -> { 1 }
       attribute :operations, :string, collection: true, values: %w[parsing generation xpath xquery xslt xslt30 validation streaming memory]

@@ -497,11 +497,15 @@ b: 2
   describe Serialbench::Serializers::Json::YeptrisSerializer do
     let(:serializer) { described_class.instance }
 
-    it 'parses JSON without claiming generation' do
+    it 'round-trips JSON documents' do
       skip 'yeptris unavailable' unless serializer.available?
 
-      expect(serializer.parse('{"a":1,"b":[1,2]}')).to eq('a' => 1, 'b' => [1, 2])
-      expect(serializer.capabilities).not_to include(:generate)
+      data = { 'a' => 1, 'b' => [1, 2] }
+      expect(serializer.parse(serializer.generate(data))).to eq(data)
+    end
+
+    it 'declares the generation capability' do
+      expect(serializer.capabilities).to include(:parse, :generate)
     end
   end
 
