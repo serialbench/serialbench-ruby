@@ -1,0 +1,27 @@
+type: object
+title: Serialbench Environment Config
+description: Schema for benchmark environment configuration files (basic structure validation)
+properties:
+  name:
+    type: string
+  kind:
+    type: string
+    enum: [local, docker, asdf]
+  created_at:
+    type: string
+  ruby_build_tag:
+    type: string
+  description:
+    type: string
+  docker:
+    type: object
+    properties:
+      image:
+        type: string
+      dockerfile:
+        type: string
+  asdf:
+    type: object
+    properties:
+      auto_install:
+        type: boolean

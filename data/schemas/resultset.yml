@@ -1,0 +1,16 @@
+type: object
+title: Serialbench Resultset
+description: Schema for benchmark resultset files (basic structure validation)
+properties:
+  name:
+    type: string
+  description:
+    type: string
+  created_at:
+    type: string
+  updated_at:
+    type: string
+  results:
+    type: array
+    items:
+      type: object
