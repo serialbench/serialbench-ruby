@@ -58,6 +58,12 @@ for TRY in 1 2 3 4 5; do
     echo "attempt $TRY got $HTTP_CODE — refetching sha and retrying"
     sleep $((TRY * 3))
     HTTP_CODE=$(put_file "$SHA")
+  elif [ "$HTTP_CODE" = "000" ]; then
+    # 000 = no HTTP response at all (connection-level blip). Retrying is
+    # the only recovery — breaking here silently drops the format.
+    echo "attempt $TRY got 000 (no response) — retrying"
+    sleep $((TRY * 5))
+    HTTP_CODE=$(put_file "")
   else
     break
   fi
