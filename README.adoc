@@ -9,7 +9,7 @@ image:https://img.shields.io/github/issues-pr-raw/serialbench/serialbench.svg["P
 
 Serialbench is a comprehensive benchmarking suite that evaluates the performance of popular Ruby serialization libraries across multiple formats. It provides detailed performance comparisons and analysis to help developers make informed decisions when choosing serialization libraries for their Ruby applications.
 
-**Supported Formats**: XML, JSON, YAML, TOML, and more
+**Supported Formats**: XML, HTML, JSON, YAML, TOML, and CBOR
 
 **Key Metrics**: Parsing speed, generation speed, memory usage, streaming capabilities, and feature completeness
 
@@ -23,73 +23,128 @@ Serialbench is a comprehensive benchmarking suite that evaluates the performance
 
 | XML
 | https://github.com/ohler55/ox[Ox]
-| v2.14.23
+| 2.14.29
 | C extension XML parser
 
 | XML
 | https://github.com/xml4r/libxml-ruby[LibXML]
-| v4.1.2
+| 6.0.0
 | Ruby bindings for libxml2
 
 | XML
 | https://github.com/sparklemotion/nokogiri[Nokogiri]
-| v1.18.8
+| 1.19.4
 | XML/HTML parser with XPath and CSS selectors
 
 | XML
 | https://github.com/YorickPeterse/oga[Oga]
-| v3.4
+| 3.5
 | Pure Ruby XML parser with XPath support
 
 | XML
 | https://github.com/leptris/leptris-ruby[Leptris]
-| v1.1.0
-| FFI binding to libleptris (pure-C XML 1.0, XPath 1.0, SAX)
+| 1.9.379.0
+| FFI binding to libleptris (pure-C XML 1.0, XPath/XQuery/XSLT, SAX)
 
 | XML
 | https://github.com/ruby/rexml[REXML]
-| v3.4.1
+| 3.4.4
 | Ruby's standard library XML parser
+
+| XML
+| https://github.com/Saxonica/Saxon-HE[Saxon-HE]
+| 12.10
+| Reference XSLT 2.0/3.0 engine, invoked through its Java CLI (`SAXON_JAR`)
+
+| HTML
+| Nokogiri
+| 1.19.4
+| HTML parsing through the same gem as the XML adapter
+
+| HTML
+| Oga
+| 3.5
+| Pure Ruby HTML parsing
+
+| HTML
+| https://github.com/leptris/leptris-ruby[Leptris]
+| 1.9.379.0
+| HTML 4 engine (libxml2/Nokogiri-compatible shape)
+
+| HTML
+| https://github.com/leptris/leptris-ruby[Leptris-whatwg]
+| 1.9.379.0
+| WHATWG-conformant HTML engine, priced separately
 
 | JSON
 | https://github.com/ohler55/oj[Oj]
-| v3.16.11
+| 3.17.6
 | JSON parser with multiple parsing modes
 
 | JSON
 | https://github.com/brianmario/yajl-ruby[YAJL]
-| v1.4.3
+| 1.4.3
 | JSON library with streaming capabilities
 
 | JSON
 | https://github.com/flori/json[JSON]
-| v2.12.2
+| 3.1.0
 | Ruby's standard library JSON parser
+
+| JSON
+| https://github.com/glycerine/rapidjson[rapidjson]
+| 0.4.0
+| Ruby bindings for RapidJSON
+
+| JSON
+| https://github.com/leptris/yeptris-ruby[yeptris-json]
+| 0.6.34.3
+| FFI binding to libyeptris' native JSON materializer
 
 | YAML
 | https://github.com/ruby/psych[Psych]
-| v5.1.2
+| bundled
 | Ruby's standard library YAML parser
 
 | YAML
 | https://github.com/ruby/syck[Syck]
-| v1.5.1.1
+| 1.6.2
 | Legacy YAML parser
+
+| YAML
+| https://github.com/leptris/yeptris-ruby[yeptris-yaml]
+| 0.6.34.3
+| FFI binding to libyeptris' YAML face
+
+| CBOR
+| https://github.com/cbor-ruby/cbor[cbor]
+| 0.5.10.3
+| RFC 7049 CBOR codec
+
+| CBOR
+| https://github.com/leptris/yeptris-ruby[yeptris-cbor]
+| 0.6.34.3
+| FFI binding to libyeptris' CBOR face (parse-only)
 
 | TOML
 | https://github.com/fbernier/tomlib[Tomlib]
-| v0.7.3
+| 0.7.3
 | TOML parser implemented in C
 
 | TOML
 | https://github.com/emancu/toml-rb[TOML-RB]
-| v2.2.0
+| 4.2.1
 | Pure Ruby TOML parser
 
 | TOML
 | https://github.com/fbernier/tomlrb[tomlrb]
-| v2.0.3
+| 2.0.4
 | A Racc based TOML Ruby parser (Only supports parsing, no support for dumping/writing.)
+
+| TOML
+| https://github.com/leptris/teptris-ruby[Teptris]
+| 0.3.6.3
+| Native C extension over libteptris (C99 TOML parser/emitter)
 
 |===
 
@@ -101,9 +156,8 @@ different formats for single-environment and multi-environment runs.
 
 The data formats include:
 
-* **Single benchmark results**: Individual benchmark run output
-* **Result set data structure**: Multi-platform benchmark aggregation
-* **JSON schema specification**: Complete schema validation rules
+* **Single benchmark results**: One YAML file per platform × Ruby × format
+* **JSON schema specification**: Schema validation via `serialbench validate`
 * **Configuration file formats**: Docker and ASDF configuration examples
 
 == Prerequisites
@@ -192,8 +246,8 @@ $ gem install serialbench
 
 == Command line interface
 
-Serialbench provides a comprehensive Thor-based CLI with four main subcommands
-for managing environments, benchmarks, result sets, and Ruby builds.
+Serialbench provides a Thor-based CLI with subcommands for managing
+environments, benchmarks, Ruby builds, and schema validation.
 
 === Main Commands Overview
 
@@ -208,8 +262,8 @@ USAGE:
 COMMANDS:
   environment   Manage benchmark environments (Docker, ASDF, Local)
   benchmark     Manage individual benchmark runs
-  resultset     Manage benchmark resultsets (collections of runs)
-  ruby-build    Manage Ruby-Build definitions for validation
+  ruby_build    Manage Ruby-Build definitions for validation
+  validate      Validate YAML files against schemas
   version       Show version information
   help          Show this help message
 
@@ -217,21 +271,16 @@ EXAMPLES:
   # Create a Docker environment
   serialbench environment new docker-test docker
 
-  # Run multi-environment benchmarks
-  serialbench environment multi-execute asdf --config=serialbench-asdf.yml
-  serialbench environment multi-execute docker --config=serialbench-docker.yml
+  # Run a benchmark in an environment
+  serialbench environment execute config/environments/docker-test.yml config/benchmarks/full-xml.yml results/runs/docker-test/xml
 
   # Create and execute a benchmark
   serialbench benchmark create my-benchmark
-  serialbench benchmark execute my-benchmark.yml
+  serialbench benchmark execute config/environments/local-dev.yml config/runs/my-benchmark.yml
 
-  # Create a result set for comparison
-  serialbench resultset create comparison-set
-  serialbench resultset add-result comparison-set results/my-benchmark
-
-  # Generate static sites
-  serialbench benchmark build-site results/my-benchmark
-  serialbench resultset build-site resultsets/comparison-set
+  # Validate YAML files against the bundled schemas
+  serialbench validate result results/runs/my-run/xml/results.yaml
+  serialbench validate config config/benchmarks/full.yml
 ----
 
 === Environment management
@@ -270,23 +319,6 @@ The `_docker_execute` command is a private command used internally by the
 `execute` command to run benchmarks in Docker environments.
 
 
-=== Result set management
-
-The `resultset` subcommand manages collections of benchmark runs for comparison analysis.
-
-[source]
-----
-$ serialbench resultset help
-Commands:
-  serialbench resultset add-result RESULT_PATH RESULTSET_PATH     # Add a run to a resultset
-  serialbench resultset build-site RESULTSET_PATH [OUTPUT_DIR]    # Generate HTML site for a resultset
-  serialbench resultset create NAME PATH                          # Create a new resultset
-  serialbench resultset help [COMMAND]                            # Describe subcommands or one specific subcommand
-  serialbench resultset list                                      # List all available resultsets
-  serialbench resultset remove-result RESULTSET_PATH RESULT_PATH  # Remove a run from a resultset
-----
-
-
 === ruby-build management
 
 The `ruby-build` subcommand manages Ruby build definitions and version information.
@@ -322,20 +354,11 @@ $ bundle exec serialbench environment prepare config/environments/docker-ruby-3.
 # 2. Run benchmark
 $ bundle exec serialbench environment execute config/environments/docker-ruby-3.1.yml config/benchmarks/short.yml results/runs/docker-ruby-3.1-results
 
-# 3. Create a resultset
-$ bundle exec serialbench resultset create docker-comparison results/sets/docker-comparison
+# 3. Inspect the per-format results
+$ ls results/runs/docker-ruby-3.1-results/xml/   # one results.yaml per format
 
-# 3a. (Optional) Build the site from the result if you want to visualize results
-$ bundle exec serialbench benchmark build-site results/runs/docker-ruby-3.1-results/ --output_dir=_site_result
-
-# 4. Add the result to the resultset
-$ bundle exec serialbench resultset add-result results/sets/docker-comparison/ results/runs/docker-ruby-3.1-results/
-
-# 5. Build the site from the resultset
-$ bundle exec serialbench resultset build-site results/sets/docker-comparison/
-
-# 6. Open the generated site
-$ open _site/index.html
+# CI pushes each format to the serialbench/data repo as it completes; the
+# dashboard (serialbench/serialbench.github.io) builds from that repo.
 ----
 
 === ASDF-based testing
@@ -455,33 +478,6 @@ warmup: 3
 ----
 
 == Results structure
-
-=== Individual run results
-
-Results are stored in a structured directory format, with each run containing
-raw benchmark data and execution logs.
-
-The directory is located at `results/runs/{name}/`, where `{name}` is the name
-of the environment used for the benchmark.
-
-[source]
-----
-results/runs/docker-ruby-33-results/
-├── results.yaml                    # Raw benchmark data
-└── benchmark.log                   # Execution log
-----
-
-=== ResultSet structure
-
-ResultSets aggregate multiple benchmark runs for comparison. They are stored in
-a structured directory format at `results/sets/{name}/`, where `{name}` is the
-name of the result set.
-
-[source]
-----
-results/sets/ruby-version-comparison/
-└── resultset.yml                  # Result set configuration
-----
 
 == Benchmark categories
 

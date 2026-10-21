@@ -5,7 +5,7 @@ require 'lutaml/model'
 module Serialbench
   module Models
     class SerializerInformation < Lutaml::Model::Serializable
-      attribute :format, :string, values: %w[xml html json yaml toml]
+      attribute :format, :string, values: %w[xml html json yaml toml cbor]
       attribute :name, :string
       attribute :version, :string
       attribute :features, :hash
@@ -20,7 +20,7 @@ module Serialbench
 
     class AdapterPerformance < Lutaml::Model::Serializable
       attribute :adapter, :string
-      attribute :format, :string, values: %w[xml html json yaml toml]
+      attribute :format, :string, values: %w[xml html json yaml toml cbor]
       attribute :data_size, :string, values: %w[small medium large]
 
       key_value do

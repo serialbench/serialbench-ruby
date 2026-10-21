@@ -5,7 +5,8 @@ require_relative 'base_json_serializer'
 module Serialbench
   module Serializers
     module Json
-      # Yeptris JSON side: parsing only — no dump in 0.2.x
+      # Yeptris JSON side: 0.2.x was parse-only; 0.6.x ships a native
+      # dump that round-trips the canonical fixtures exactly.
       class YeptrisSerializer < BaseJsonSerializer
         def name
           'yeptris-json'
@@ -16,8 +17,13 @@ module Serialbench
           Yeptris::JSON.load(json_string)
         end
 
+        def generate(object, _options = {})
+          require 'yeptris'
+          Yeptris::JSON.dump(object)
+        end
+
         def capabilities
-          Set.new(%i[dom parse])
+          Set.new(%i[dom parse generate])
         end
 
         def available?

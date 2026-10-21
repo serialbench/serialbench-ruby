@@ -1,0 +1,34 @@
+type: object
+title: Serialbench Benchmark Config
+description: Schema for benchmark configuration files (basic structure validation)
+properties:
+  name:
+    type: string
+  description:
+    type: string
+  data_sizes:
+    type: array
+    items:
+      type: string
+      enum: [small, medium, large]
+  formats:
+    type: array
+    items:
+      type: string
+      enum: [xml, html, json, yaml, toml, cbor]
+  iterations:
+    type: object
+    properties:
+      small:
+        type: integer
+      medium:
+        type: integer
+      large:
+        type: integer
+  warmup:
+    type: integer
+  operations:
+    type: array
+    items:
+      type: string
+      enum: [parsing, generation, xpath, xquery, xslt, xslt30, validation, streaming, memory]
