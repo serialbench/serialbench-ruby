@@ -5,10 +5,10 @@ require_relative 'base_cbor_serializer'
 module Serialbench
   module Serializers
     module Cbor
-      # Yeptris CBOR side: decode only. dump no longer segfaults
-      # (yeptris-ruby#152, fixed by 0.6.34) but mis-encodes strings shaped
-      # like exponent notation ("1e0" → 1.0), so :generate stays out of the
-      # capability set until dump round-trips the canonical fixtures.
+      # Yeptris CBOR side: load + dump. dump round-trips the canonical
+      # fixtures exactly as of 0.6.35.1 (yeptris-ruby#293 — before that,
+      # strings shaped like exponent notation encoded as floats; before
+      # 0.6.34, dump segfaulted outright, yeptris-ruby#152).
       class YeptrisSerializer < BaseCborSerializer
         def name
           'yeptris-cbor'
@@ -20,8 +20,14 @@ module Serialbench
           Yeptris::CBOR.load(cbor_bytes)
         end
 
+        def generate(object, _options = {})
+          require 'yeptris'
+          require 'yeptris/cbor'
+          Yeptris::CBOR.dump(object)
+        end
+
         def capabilities
-          Set.new(%i[dom parse])
+          Set.new(%i[dom parse generate])
         end
 
         def available?
