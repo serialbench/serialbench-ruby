@@ -31,19 +31,19 @@ RSpec.describe Serialbench::Serializers::Cbor do
   describe Serialbench::Serializers::Cbor::YeptrisSerializer do
     subject(:serializer) { described_class.instance }
 
-    it 'decodes the canonical fixtures' do
+    it 'round-trips the canonical fixtures through dump' do
       skip 'yeptris CBOR unavailable' unless serializer.available?
       skip 'canonical fixtures not cloned' unless File.exist?('test_data/small.cbor')
 
       decoded = serializer.parse(File.binread('test_data/small.cbor'))
-      expect(decoded).to be_a(Hash)
+      expect(serializer.parse(serializer.generate(decoded))).to eq(decoded)
     end
 
-    it 'is parse-only while dump mis-encodes exponent-notation strings' do
+    it 'declares the generation capability' do
       skip 'yeptris CBOR unavailable' unless serializer.available?
 
       expect(serializer.supports?(:parse)).to be(true)
-      expect(serializer.supports?(:generate)).to be(false)
+      expect(serializer.supports?(:generate)).to be(true)
     end
   end
 end
