@@ -64,10 +64,18 @@ for TRY in 1 2 3 4 5; do
   if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then break; fi
   if [ "$HTTP_CODE" = "409" ] || [ "$HTTP_CODE" = "422" ]; then
     SHA=$(fetch_sha)
-    [ -z "$SHA" ] && break
-    echo "attempt $TRY got $HTTP_CODE — refetching sha and retrying"
-    sleep $((TRY * 3))
-    HTTP_CODE=$(put_file "$SHA")
+    if [ -n "$SHA" ]; then
+      echo "attempt $TRY got $HTTP_CODE — refetching sha and retrying"
+      sleep $((TRY * 3))
+      HTTP_CODE=$(put_file "$SHA")
+    else
+      # Create-phase 409: the branch moved while creating a NEW file —
+      # there is no sha to fetch, so a sha-retry cannot recover. Plain
+      # retry; a real 422 (file exists) re-detects on the next pass.
+      echo "attempt $TRY got $HTTP_CODE with no existing file — retrying create"
+      sleep $((TRY * 3))
+      HTTP_CODE=$(put_file "")
+    fi
   elif [ "$HTTP_CODE" = "000" ]; then
     # 000 = no HTTP response at all (connection-level blip). Retrying is
     # the only recovery — breaking here silently drops the format.
