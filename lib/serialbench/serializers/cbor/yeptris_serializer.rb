@@ -15,13 +15,11 @@ module Serialbench
         end
 
         def parse(cbor_bytes)
-          require 'yeptris'
           require 'yeptris/cbor'
           Yeptris::CBOR.load(cbor_bytes)
         end
 
         def generate(object, _options = {})
-          require 'yeptris'
           require 'yeptris/cbor'
           Yeptris::CBOR.dump(object)
         end
@@ -34,10 +32,8 @@ module Serialbench
           return @available if defined?(@available)
 
           @available = begin
-            # yeptris/cbor assumes the bootstrap ('yeptris' defines
-            # Yeptris::Error) — requiring the submodule alone raises
-            # NameError, so always load the parent first.
-            require 'yeptris'
+            # Faces bootstrap themselves since yeptris 0.6.35.2
+            # (yeptris-ruby#300) — standalone requires are safe.
             require 'yeptris/cbor'
             raise LoadError, 'libyeptris has no CBOR support' unless Yeptris::CBOR.available?
 
