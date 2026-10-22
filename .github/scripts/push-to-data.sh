@@ -31,14 +31,24 @@ echo "Pushing ${TARGET_PATH} to serialbench/data..."
 
 # Try create; 409 (branch race) and 422 (exists) both retry with fresh sha
 put_file() {
-  local sha_arg=()
-  [ -n "${1:-}" ] && sha_arg=(-d "{\"message\": \"${PLATFORM} ruby-${RUBY_VERSION} ${FMT} (update)\", \"content\": \"${CONTENT}\", \"sha\": \"$1\", \"branch\": \"main\"}")
-  [ -n "${1:-}" ] || sha_arg=(-d "{\"message\": \"${PLATFORM} ruby-${RUBY_VERSION} ${FMT}\", \"content\": \"${CONTENT}\", \"branch\": \"main\"}")
+  # The body goes through a file: passing it as a curl argument hits the
+  # ~32KB exec limit on windows/msys once a results.yaml grows ("Argument
+  # list too long" -> curl never runs -> the format silently drops).
+  local body
+  body=$(mktemp /tmp/push-body.XXXXXX)
+  if [ -n "${1:-}" ]; then
+    printf '{"message": "%s (update)", "content": "%s", "sha": "%s", "branch": "main"}' \
+      "${PLATFORM} ruby-${RUBY_VERSION} ${FMT}" "$CONTENT" "$1" > "$body"
+  else
+    printf '{"message": "%s", "content": "%s", "branch": "main"}' \
+      "${PLATFORM} ruby-${RUBY_VERSION} ${FMT}" "$CONTENT" > "$body"
+  fi
   curl -s -o /tmp/data-push-resp.json -w "%{http_code}" -X PUT \
     -H "Authorization: Bearer ${DATA_TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     "https://api.github.com/repos/serialbench/data/contents/${TARGET_PATH}" \
-    "${sha_arg[@]}" || echo 000
+    --data-binary @"$body" || echo 000
+  rm -f "$body"
 }
 
 # Sha of the existing data file, empty on any failure — guarded so a dead
@@ -81,11 +91,13 @@ elif [ "$HTTP_CODE" = "422" ]; then
       echo "::warning::422 but couldn't get sha for ${TARGET_PATH}"
       break
     fi
+    printf '{"message": "%s (update)", "content": "%s", "sha": "%s", "branch": "main"}' \
+      "${PLATFORM} ruby-${RUBY_VERSION} ${FMT}" "$CONTENT" "${SHA}" > /tmp/push-body.json
     UPDATE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
       -H "Authorization: Bearer ${DATA_TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       "https://api.github.com/repos/serialbench/data/contents/${TARGET_PATH}" \
-      -d "{\"message\": \"${PLATFORM} ruby-${RUBY_VERSION} ${FMT} (update)\", \"content\": \"${CONTENT}\", \"sha\": \"${SHA}\", \"branch\": \"main\"}")
+      --data-binary @/tmp/push-body.json)
     [ "$UPDATE_CODE" = "200" ] && break
     echo "update attempt $TRY got $UPDATE_CODE — refetching sha"
     sleep 2
