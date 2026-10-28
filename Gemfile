@@ -12,9 +12,9 @@ unless Gem.win_platform? && RUBY_PLATFORM.include?('aarch64')
   gem 'libxml-ruby'
 end
 
-gem 'leptris', '1.9.381.0'  # parse_html defaults :html4 (nokogiri-parity); :whatwg priced separately
-gem 'yeptris', '0.6.43.0'   # JSON + CBOR load/dump; faces load standalone (#300); 0.6.4x carries the #739 write-path slices
-gem 'teptris', '0.3.6.3'    # 0.3.x line (native-doc API); Teptris::TOML.load/dump unchanged
+gem 'leptris', '1.9.385.0'  # parse_html defaults :html4 (nokogiri-parity); :whatwg priced separately; 1.9.38x carries the #1842 campaign
+gem 'yeptris', '0.6.48.0'   # JSON + CBOR load/dump; faces load standalone (#300); 0.6.4x carries the #739 write-path slices
+gem 'teptris', '0.3.9.1'    # 0.3.x line (native-doc API); Teptris::TOML.load/dump unchanged
 gem 'cbor'                  # RFC 7049 CBOR codec
 gem 'benchmark'  # Removed from stdlib in Ruby 4.0
 gem 'base64'  # Required for Ruby 3.4+
