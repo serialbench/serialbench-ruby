@@ -31,4 +31,4 @@ properties:
     type: array
     items:
       type: string
-      enum: [parsing, generation, xpath, xquery, xslt, xslt30, validation, streaming, memory]
+      enum: [parsing, generation, xpath, xquery, xslt, xslt30, validation, c14n, diff, plan, streaming, memory]
