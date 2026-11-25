@@ -89,7 +89,7 @@ module Serialbench
             id: i,
             name: "User #{i}",
             email: "user#{i}@example.com",
-            created_at: "2023-01-#{(i % 28) + 1}T10:00:00Z",
+            created_at: "2023-01-#{format('%02d', (i % 28) + 1)}T10:00:00Z",
             profile: {
               age: 20 + (i % 50),
               city: "City #{i % 100}",
