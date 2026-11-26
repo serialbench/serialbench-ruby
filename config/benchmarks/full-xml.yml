@@ -25,6 +25,9 @@ operations:
 - xslt
 - xslt30
 - validation
+- c14n
+- diff
+- plan
 - memory
 
 warmup: 2
