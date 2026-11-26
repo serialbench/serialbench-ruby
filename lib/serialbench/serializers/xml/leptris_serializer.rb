@@ -37,7 +37,114 @@ module Serialbench
         end
 
         def capabilities
-          super | Set.new(%i[xpath xquery xslt xslt30 validation sax stax])
+          super | Set.new(%i[xpath xquery xslt xslt30 validation sax stax c14n diff plan])
+        end
+
+        def c14n(document)
+          require 'leptris'
+          require 'leptris/xml'
+          document.canonicalize
+        end
+
+        def diff(before, after)
+          require 'leptris'
+          require 'leptris/xml'
+          Leptris::XML.diff(before, after, ignore_ws: true)
+        end
+
+        # Query-plan walk (Descriptor materialization): the per-size
+        # descriptor follows the document root (config/users/dataset)
+        # and is compiled once per stem, mirroring the C harness.
+        def plan_walk(document)
+          require 'leptris'
+          require 'leptris/xml'
+
+          descriptor = descriptors[document.root.name] ||= build_descriptor(document.root.name)
+          descriptor.walk(document.root).to_ruby
+        end
+
+        def build_descriptor(stem)
+          require 'leptris'
+          require 'leptris/xml'
+
+          case stem
+          when 'config'
+            Leptris::XML::Descriptor.build(
+              name: 'config',
+              children: [
+                { name: 'database', kind: :nested, plan: {
+                  name: 'database',
+                  children: %w[host port name user password].map do |f|
+                    { name: f, kind: :scalar }
+                  end
+                } },
+                { name: 'cache', kind: :nested, plan: {
+                  name: 'cache',
+                  children: [{ name: 'enabled', kind: :scalar }, { name: 'ttl', kind: :scalar }]
+                } }
+              ]
+            )
+          when 'users'
+            Leptris::XML::Descriptor.build(
+              name: 'users',
+              children: [{
+                name: 'user', kind: :collection, plan: {
+                  name: 'user',
+                  attributes: [{ name: 'id', kind: :scalar }],
+                  children: [
+                    { name: 'name', kind: :scalar },
+                    { name: 'email', kind: :scalar },
+                    { name: 'created_at', kind: :scalar },
+                    { name: 'profile', kind: :nested, plan: {
+                      name: 'profile',
+                      children: [
+                        { name: 'age', kind: :scalar },
+                        { name: 'city', kind: :scalar },
+                        { name: 'preferences', kind: :nested, plan: {
+                          name: 'preferences',
+                          children: [
+                            { name: 'theme', kind: :scalar },
+                            { name: 'notifications', kind: :scalar }
+                          ]
+                        } }
+                      ]
+                    } }
+                  ]
+                }
+              }]
+            )
+          else
+            Leptris::XML::Descriptor.build(
+              name: 'dataset',
+              children: [
+                { name: 'header', kind: :nested, plan: {
+                  name: 'header',
+                  children: %w[created count format].map do |f|
+                    { name: f, kind: :scalar }
+                  end
+                } },
+                { name: 'records', kind: :collection, plan: {
+                  name: 'record',
+                  attributes: [{ name: 'id', kind: :scalar }],
+                  children: [
+                    { name: 'timestamp', kind: :scalar },
+                    { name: 'data', kind: :nested, plan: {
+                      name: 'data',
+                      children: %w[field1 field2 field3].map do |f|
+                        { name: f, kind: :scalar }
+                      end
+                    } },
+                    { name: 'metadata', kind: :nested, plan: {
+                      name: 'metadata',
+                      children: %w[source version checksum].map do |f|
+                        { name: f, kind: :scalar }
+                      end
+                    } }
+                  ]
+                } }
+              ]
+            )
+          end
         end
 
         def xquery_eval(document, expression)
