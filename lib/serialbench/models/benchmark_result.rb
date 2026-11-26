@@ -75,6 +75,9 @@ module Serialbench
       attribute :xslt, IterationPerformance, collection: true
       attribute :xslt30, IterationPerformance, collection: true
       attribute :validation, IterationPerformance, collection: true
+      attribute :c14n, IterationPerformance, collection: true
+      attribute :diff, IterationPerformance, collection: true
+      attribute :plan, IterationPerformance, collection: true
 
       key_value do
         map 'serializers', to: :serializers
@@ -87,6 +90,9 @@ module Serialbench
         map 'xslt', to: :xslt
         map 'xslt30', to: :xslt30
         map 'validation', to: :validation
+        map 'c14n', to: :c14n
+        map 'diff', to: :diff
+        map 'plan', to: :plan
       end
     end
   end
