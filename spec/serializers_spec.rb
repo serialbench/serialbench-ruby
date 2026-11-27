@@ -733,5 +733,20 @@ b: 2
         expect(serializer).to respond_to(:stream_parse)
       end
     end
+
+    it 'leptris prices c14n, diff, and plan walks on the canonical shapes' do
+      serializer = Serialbench::Serializers::Xml::LeptrisSerializer.instance
+      skip 'leptris unavailable' unless serializer.available?
+
+      doc = serializer.parse(File.read('test_data/medium.xml'))
+
+      expect(serializer.c14n(doc)).to be_a(String)
+      expect(serializer.diff(doc, serializer.parse(File.read('test_data/medium.xml'))).ops).to be_empty
+
+      walked = serializer.plan_walk(doc)
+      expect(walked).to be_a(Hash)
+      users = walked['users'] || walked[:users]
+      expect(users).not_to be_empty
+    end
   end
 end

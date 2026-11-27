@@ -123,7 +123,7 @@ module Serialbench
                     { name: f, kind: :scalar }
                   end
                 } },
-                { name: 'records', kind: :collection, plan: {
+                { name: 'records', kind: :nested, plan: {
                   name: 'record',
                   attributes: [{ name: 'id', kind: :scalar }],
                   children: [
@@ -145,6 +145,10 @@ module Serialbench
               ]
             )
           end
+        end
+
+        def descriptors
+          @descriptors ||= {}
         end
 
         def xquery_eval(document, expression)
