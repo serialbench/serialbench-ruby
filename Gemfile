@@ -19,6 +19,7 @@ gem 'cbor'                  # RFC 7049 CBOR codec
 gem 'benchmark'  # Removed from stdlib in Ruby 4.0
 gem 'base64'  # Required for Ruby 3.4+
 gem 'lutaml-model', '~> 0.8'
+gem 'moxml'                 # lutaml unified XML API; prices the abstraction layer over its default leptris backend
 gem 'octokit'
 gem 'rake'
 gem 'rspec'
