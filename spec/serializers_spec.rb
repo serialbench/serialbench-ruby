@@ -444,7 +444,7 @@ RSpec.describe 'Serialbench Serializers' do
 
       it 'includes all expected JSON serializers' do
         json_serializers = Serialbench::Serializers.for_format(:json)
-        expected_json = %w[json oj rapidjson yajl yeptris-json]
+        expected_json = %w[json oj rapidjson yajl yeptris-json yeptris-schema]
         actual_json = json_serializers.map { |s| s.name }
         expect(actual_json).to match_array(expected_json)
       end
@@ -544,14 +544,14 @@ b: 2
       doc = adapter.parse(xml_doc)
       expect(adapter.xquery_eval(doc, '//book[price > 30]')).to eq(1)
       expect(adapter.xslt_transform(doc, xsl)).to include('<out>2</out>')
-      expect(adapter.validate(doc, rng)).to be true
+      expect(adapter.validate(xml_doc, rng)).to be true
     end
 
     it 'nokogiri transforms and validates' do
       adapter = Serialbench::Serializers::Xml::NokogiriSerializer.instance
       doc = adapter.parse(xml_doc)
       expect(adapter.xslt_transform(doc, xsl)).to include('<out>2</out>')
-      expect(adapter.validate(doc, rng)).to be true
+      expect(adapter.validate(xml_doc, rng)).to be true
     end
   end
 
@@ -793,6 +793,14 @@ b: 2
 
       dataset = serializer.plan_walk(File.read('test_data/large.toml'))
       expect(dataset['dataset']['records'].length).to eq(1000)
+    end
+
+    it 'yeptris-schema validates the canonical json shapes' do
+      serializer = Serialbench::Serializers::Json::YeptrisSchemaSerializer.instance
+      skip 'yeptris unavailable' unless serializer.available?
+
+      expect(serializer.validate(File.read('test_data/medium.json'), nil)).to be true
+      expect(serializer.validate(File.read('test_data/large.json'), nil)).to be true
     end
 
     it 'moxml parses, emits, and queries through its default backend' do

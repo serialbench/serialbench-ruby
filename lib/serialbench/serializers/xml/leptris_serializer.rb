@@ -170,10 +170,10 @@ module Serialbench
           Leptris::XML::XSLT.parse(stylesheet).apply_to(document).serialize
         end
 
-        def validate(document, schema)
+        def validate(xml_string, schema)
           require 'leptris'
           require 'leptris/xml'
-          Leptris::XML::RelaxNG.parse(schema).valid?(document)
+          Leptris::XML::RelaxNG.parse(schema).valid?(parse(xml_string))
         end
 
         def xpath_query(document, expression)

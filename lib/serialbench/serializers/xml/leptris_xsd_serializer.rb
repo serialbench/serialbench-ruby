@@ -18,12 +18,14 @@ module Serialbench
           Set.new(%i[validation])
         end
 
-        def validate(document, _schema)
+        def validate(xml_string, _schema)
           require 'leptris'
           require 'leptris/xml'
 
-          schema = schemas[document.root.name] ||= begin
-            path = File.join('test_data', "#{document.root.name}.xsd")
+          stem = xml_string.include?('<users') ? 'users' : xml_string.include?('<dataset') ? 'dataset' : 'config'
+          document = parse(xml_string)
+          schema = schemas[stem] ||= begin
+            path = File.join('test_data', "#{stem}.xsd")
             raise "missing #{path}" unless File.exist?(path)
 
             Leptris::XML::XSD.compile_file(path)

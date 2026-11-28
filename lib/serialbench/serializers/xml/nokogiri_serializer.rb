@@ -47,9 +47,9 @@ module Serialbench
           Nokogiri::XSLT(stylesheet).transform(document).to_s
         end
 
-        def validate(document, schema)
+        def validate(xml_string, schema)
           require 'nokogiri'
-          Nokogiri::XML::RelaxNG(schema).valid?(document)
+          Nokogiri::XML::RelaxNG(schema).valid?(parse(xml_string))
         end
 
         def xpath_query(document, expression)
