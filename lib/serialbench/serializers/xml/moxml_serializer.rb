@@ -22,16 +22,14 @@ module Serialbench
           require 'moxml'
           return data.to_xml if data.respond_to?(:to_xml)
 
-          # hash payload: mirror the sibling adapters' simple key/value
-          # document ({"test" => "value"} → <r><test>value</test></r>)
-          doc = Moxml.new.create_document
-          root = doc.create_element('r')
-          doc.root = root
-          data.each do |key, value|
-            child = root.add_element(key.to_s)
-            child.text = value.to_s
-          end
-          doc.to_xml
+          # hash payload: emit the sibling adapters' simple key/value
+          # document as XML text — moxml's mutation API varies by the
+          # resolved adapter (the nokogiri fallback lacks add_element)
+          require 'cgi'
+          body = data.map do |key, value|
+            "<#{key}>#{CGI.escapeHTML(value.to_s)}</#{key}>"
+          end.join
+          "<r>#{body}</r>"
         end
 
         def capabilities
