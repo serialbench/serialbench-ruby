@@ -30,6 +30,7 @@ require_relative 'serializers/json/oj_serializer'
 require_relative 'serializers/json/yajl_serializer'
 require_relative 'serializers/json/rapidjson_serializer'
 require_relative 'serializers/json/yeptris_serializer'
+require_relative 'serializers/json/yeptris_schema_serializer'
 
 # YAML Serializers
 require_relative 'serializers/yaml/base_yaml_serializer'
@@ -70,6 +71,7 @@ module Serialbench
         Json::OjSerializer,
         Json::RapidjsonSerializer,
         Json::YajlSerializer,
+        Json::YeptrisSchemaSerializer,
         Json::YeptrisSerializer
       ],
       html: [

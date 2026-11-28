@@ -189,7 +189,10 @@ XSL30
       },
       'xslt' => ->(s, data) { s.xslt_apply(data, XSLT_STYLESHEET) },
       'xslt30' => ->(s, data) { s.xslt_apply(data, XSLT30_STYLESHEET) },
-      'validation' => ->(s, data) { s.validate(s.parse(data), RNG_SCHEMA) },
+      # validation faces take the raw bytes and parse inside (the
+      # py/js/C contract); the rng artifact rides along for the
+      # RelaxNG faces
+      'validation' => ->(s, data) { s.validate(data, RNG_SCHEMA) },
       'c14n' => ->(s, data) { s.c14n(s.parse(data)) },
       'diff' => lambda { |s, data|
         before = s.parse(data)
