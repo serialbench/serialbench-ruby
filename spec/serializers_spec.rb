@@ -743,10 +743,31 @@ b: 2
       expect(serializer.c14n(doc)).to be_a(String)
       expect(serializer.diff(doc, serializer.parse(File.read('test_data/medium.xml'))).ops).to be_empty
 
-      walked = serializer.plan_walk(doc)
+      walked = serializer.plan_walk(File.read('test_data/medium.xml'))
       expect(walked).to be_a(Hash)
-      users = walked['users'] || walked[:users]
-      expect(users).not_to be_empty
+      expect(walked[:kind]).to eq(:element)
+      user_rows = walked[:children].select { |c| c.is_a?(Hash) && c[:name] == 'user' }
+      expect(user_rows.length).to eq(1000)
+      expect(user_rows.first[:attributes]['id']).to eq('1')
+
+      dataset = serializer.plan_walk(File.read('test_data/large.xml'))
+      records = dataset[:children].find { |c| c.is_a?(Hash) && c[:name] == 'records' }
+      expect(records).not_to be_nil
+      expect(records[:children].length).to eq(10_000)
+      expect(records[:children].first[:attributes]['id']).to eq('1')
+    end
+
+    it 'yeptris-json plan walks the canonical row shapes' do
+      serializer = Serialbench::Serializers::Json::YeptrisSerializer.instance
+      skip 'yeptris unavailable' unless serializer.available?
+
+      users = serializer.plan_walk(File.read('test_data/medium.json'))
+      expect(users).to be_an(Array)
+      expect(users.length).to eq(1000)
+      expect(users.first.keys).to contain_exactly('id', 'name', 'email', 'created_at')
+
+      records = serializer.plan_walk(File.read('test_data/large.json'))
+      expect(records.length).to eq(10_000)
     end
   end
 end

@@ -20,4 +20,11 @@ jobs:
           ruby-version: '3.4'
           bundler-cache: true
 
+      # the serializer specs exercise the real faces against the
+      # canonical fixtures (same layout the benchmark legs use)
+      - name: Load canonical fixtures
+        run: |
+          git clone --depth 1 https://github.com/serialbench/fixtures.git test_data
+          (cd test_data && sha256sum -c SHA256SUMS) || (cd test_data && shasum -a 256 -c SHA256SUMS)
+
       - run: bundle exec rspec --format progress

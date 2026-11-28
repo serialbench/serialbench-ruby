@@ -196,7 +196,9 @@ XSL30
         after = s.parse(data)
         s.diff(before, after)
       },
-      'plan' => ->(s, data) { s.plan_walk(s.parse(data)) },
+      # plan walks compile-then-walk inside the adapter over the raw
+      # bytes (mirrors the C/py/js faces: parse happens inside)
+      'plan' => ->(s, data) { s.plan_walk(data) },
       'streaming' => ->(s, data) { s.stream_parse(data) { |_event, _data| } },
     }.freeze
 
