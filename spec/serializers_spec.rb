@@ -783,6 +783,18 @@ b: 2
       expect(records.length).to eq(10_000)
     end
 
+    it 'teptris plan walks the canonical row shapes' do
+      serializer = Serialbench::Serializers::Toml::TeptrisSerializer.instance
+      skip 'teptris unavailable' unless serializer.available?
+
+      users = serializer.plan_walk(File.read('test_data/medium.toml'))
+      expect(users['users'].length).to eq(100)
+      expect(users['users'].first.keys).to contain_exactly('id', 'name', 'email', 'created_at')
+
+      dataset = serializer.plan_walk(File.read('test_data/large.toml'))
+      expect(dataset['dataset']['records'].length).to eq(1000)
+    end
+
     it 'moxml parses, emits, and queries through its default backend' do
       serializer = Serialbench::Serializers::Xml::MoxmlSerializer.instance
       skip 'moxml unavailable' unless serializer.available?
