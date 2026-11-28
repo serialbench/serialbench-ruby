@@ -5,6 +5,7 @@ require_relative 'models/benchmark_result'
 
 # XML Serializers
 require_relative 'serializers/xml/base_xml_serializer'
+require_relative 'serializers/xml/moxml_serializer'
 require_relative 'serializers/xml/rexml_serializer'
 require_relative 'serializers/xml/ox_serializer'
 require_relative 'serializers/xml/nokogiri_serializer'
@@ -61,6 +62,7 @@ module Serialbench
         Xml::LeptrisSerializer,
         Xml::LeptrisXsdSerializer,
         Xml::LeptrisSchematronSerializer,
+        Xml::MoxmlSerializer,
         Xml::SaxonSerializer
       ],
       json: [

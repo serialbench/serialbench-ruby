@@ -434,7 +434,7 @@ RSpec.describe 'Serialbench Serializers' do
 
       it 'includes all expected XML serializers' do
         xml_serializers = Serialbench::Serializers.for_format(:xml)
-        expected_xml = %w[rexml ox nokogiri oga libxml leptris leptris-xsd leptris-schematron saxon-he]
+        expected_xml = %w[rexml ox nokogiri oga libxml leptris leptris-xsd leptris-schematron moxml saxon-he]
         expected_html = %w[nokogiri oga leptris leptris-whatwg]
         actual_xml = xml_serializers.map { |s| s.name }
         expect(actual_xml).to match_array(expected_xml)
@@ -768,6 +768,16 @@ b: 2
 
       records = serializer.plan_walk(File.read('test_data/large.json'))
       expect(records.length).to eq(10_000)
+    end
+
+    it 'moxml parses, emits, and queries through its default backend' do
+      serializer = Serialbench::Serializers::Xml::MoxmlSerializer.instance
+      skip 'moxml unavailable' unless serializer.available?
+
+      doc = serializer.parse('<r><a id="1">x</a><a id="2">y</a></r>')
+      expect(doc).not_to be_nil
+      expect(serializer.xpath_query(doc, '//a[@id="2"]')).to eq(1)
+      expect(serializer.generate(doc)).to include('<a id="2">y</a>')
     end
   end
 end
