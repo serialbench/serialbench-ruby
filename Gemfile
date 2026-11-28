@@ -12,7 +12,7 @@ unless Gem.win_platform? && RUBY_PLATFORM.include?('aarch64')
   gem 'libxml-ruby'
 end
 
-gem 'leptris', '1.9.443.0'  # parse_html defaults :html4 (nokogiri-parity); :whatwg priced separately; 1.9.44x carries XSD/Schematron/diff/C14N (ruby#676)
+gem 'leptris', '1.9.385.0'  # parse_html defaults :html4 (nokogiri-parity); :whatwg priced separately; 1.9.44x carries XSD/Schematron/diff/C14N (ruby#676)
 gem 'yeptris', '0.6.79.0'   # JSON + CBOR load/dump; faces load standalone (#300); 0.6.7x carries the #739 write-path campaign
 gem 'teptris', '0.3.33.1'   # 0.3.3x line; schema validation exposed (compile_schema/schema_validate)
 gem 'cbor'                  # RFC 7049 CBOR codec
