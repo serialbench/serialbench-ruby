@@ -770,6 +770,19 @@ b: 2
       expect(records.length).to eq(10_000)
     end
 
+    it 'yeptris-yaml plan walks the canonical row shapes' do
+      serializer = Serialbench::Serializers::Yaml::YeptrisSerializer.instance
+      skip 'yeptris unavailable' unless serializer.available?
+
+      users = serializer.plan_walk(File.read('test_data/medium.yaml'))
+      expect(users).to be_an(Array)
+      expect(users.length).to eq(1000)
+      expect(users.first.keys).to contain_exactly(':id', ':name', ':email', ':created_at')
+
+      records = serializer.plan_walk(File.read('test_data/large.yaml'))
+      expect(records.length).to eq(10_000)
+    end
+
     it 'moxml parses, emits, and queries through its default backend' do
       serializer = Serialbench::Serializers::Xml::MoxmlSerializer.instance
       skip 'moxml unavailable' unless serializer.available?

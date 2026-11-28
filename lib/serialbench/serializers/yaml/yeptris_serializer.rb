@@ -26,7 +26,64 @@ module Serialbench
         end
 
         def capabilities
-          super | Set.new(%i[streaming])
+          super | Set.new(%i[streaming plan])
+        end
+
+        # Query-plan walk (Descriptor materialization): the plan parses
+        # the document itself, so plan_walk takes the raw YAML string.
+        # The per-size descriptor follows the root key (config/users/
+        # dataset); the canonical yaml keys are symbol-style (":host"),
+        # mirroring the js wasm face's specs.
+        def plan_walk(yaml_string)
+          require 'yeptris'
+          require 'yeptris/yaml'
+          require 'yeptris/yaml/descriptor'
+
+          stem = plan_stem(yaml_string)
+          descriptor = plan_descriptors[stem] ||= build_plan_descriptor(stem)
+          result = descriptor.walk(yaml_string)
+          Array.new(result.rows) { |i| result.at(i) }
+        end
+
+        def plan_stem(yaml_string)
+          if yaml_string.include?(':users')
+            'users'
+          elsif yaml_string.include?(':dataset')
+            'dataset'
+          else
+            'config'
+          end
+        end
+
+        def plan_descriptors
+          @plan_descriptors ||= {}
+        end
+
+        def build_plan_descriptor(stem)
+          require 'yeptris'
+          require 'yeptris/yaml/descriptor'
+
+          case stem
+          when 'users'
+            ::Yeptris::YAML::Descriptor.build(
+              kind: :seq, path: [':users'],
+              children: %w[id name email created_at].map do |f|
+                { name: ":#{f}", kind: (f == 'id' ? :int : :str) }
+              end
+            )
+          when 'dataset'
+            ::Yeptris::YAML::Descriptor.build(
+              kind: :map, path: [':dataset', ':records'],
+              children: [{ name: ':id', kind: :int }, { name: ':timestamp', kind: :str }]
+            )
+          else
+            ::Yeptris::YAML::Descriptor.build(
+              kind: :map, path: [':config', ':database'],
+              children: %w[host port name user password].map do |f|
+                { name: ":#{f}", kind: (f == 'port' ? :int : :str) }
+              end
+            )
+          end
         end
 
         def available?
