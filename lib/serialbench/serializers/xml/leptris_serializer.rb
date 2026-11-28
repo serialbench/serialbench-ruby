@@ -55,10 +55,11 @@ module Serialbench
         # Query-plan walk (Descriptor materialization): the per-size
         # descriptor follows the document root (config/users/dataset)
         # and is compiled once per stem, mirroring the C harness.
-        def plan_walk(document)
+        def plan_walk(xml_string)
           require 'leptris'
           require 'leptris/xml'
 
+          document = parse(xml_string)
           descriptor = descriptors[document.root.name] ||= build_descriptor(document.root.name)
           descriptor.walk(document.root).to_ruby
         end
@@ -88,7 +89,7 @@ module Serialbench
             Leptris::XML::Descriptor.build(
               name: 'users',
               children: [{
-                name: 'user', kind: :collection, plan: {
+                name: 'user', kind: :nested, plan: {
                   name: 'user',
                   attributes: [{ name: 'id', kind: :scalar }],
                   children: [
