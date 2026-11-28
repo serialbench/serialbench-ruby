@@ -749,6 +749,12 @@ b: 2
       user_rows = walked[:children].select { |c| c.is_a?(Hash) && c[:name] == 'user' }
       expect(user_rows.length).to eq(1000)
       expect(user_rows.first[:attributes]['id']).to eq('1')
+
+      dataset = serializer.plan_walk(File.read('test_data/large.xml'))
+      records = dataset[:children].find { |c| c.is_a?(Hash) && c[:name] == 'records' }
+      expect(records).not_to be_nil
+      expect(records[:children].length).to eq(10_000)
+      expect(records[:children].first[:attributes]['id']).to eq('1')
     end
 
     it 'yeptris-json plan walks the canonical row shapes' do

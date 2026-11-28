@@ -125,23 +125,28 @@ module Serialbench
                   end
                 } },
                 { name: 'records', kind: :nested, plan: {
-                  name: 'record',
-                  attributes: [{ name: 'id', kind: :scalar }],
-                  children: [
-                    { name: 'timestamp', kind: :scalar },
-                    { name: 'data', kind: :nested, plan: {
-                      name: 'data',
-                      children: %w[field1 field2 field3].map do |f|
-                        { name: f, kind: :scalar }
-                      end
-                    } },
-                    { name: 'metadata', kind: :nested, plan: {
-                      name: 'metadata',
-                      children: %w[source version checksum].map do |f|
-                        { name: f, kind: :scalar }
-                      end
-                    } }
-                  ]
+                  name: 'records',
+                  children: [{
+                    name: 'record', kind: :nested, plan: {
+                      name: 'record',
+                      attributes: [{ name: 'id', kind: :scalar }],
+                      children: [
+                        { name: 'timestamp', kind: :scalar },
+                        { name: 'data', kind: :nested, plan: {
+                          name: 'data',
+                          children: %w[field1 field2 field3].map do |f|
+                            { name: f, kind: :scalar }
+                          end
+                        } },
+                        { name: 'metadata', kind: :nested, plan: {
+                          name: 'metadata',
+                          children: %w[source version checksum].map do |f|
+                            { name: f, kind: :scalar }
+                          end
+                        } }
+                      ]
+                    }
+                  }]
                 } }
               ]
             )
