@@ -31,18 +31,28 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          RUN_ID=$(gh run list -R "$GITHUB_REPOSITORY" --workflow=benchmark.yml --limit 1 --json databaseId --jq '.[0].databaseId')
-          [ -n "$RUN_ID" ] || { echo "no benchmark run found"; exit 0; }
+          # workflow_run deliveries heal the run that completed — never
+          # "latest": a newer wave may be queued or in flight, and
+          # rerunning it churns attempts out from under live legs.
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            RUN_ID=${{ github.event.workflow_run.id }}
+            CONCLUSION=${{ github.event.workflow_run.conclusion }}
+          else
+            RUN_ID=$(gh run list -R "$GITHUB_REPOSITORY" --workflow=benchmark.yml --limit 1 \
+              --status completed --json databaseId --jq '.[0].databaseId')
+            [ -n "$RUN_ID" ] || { echo "no completed benchmark run found"; exit 0; }
+            CONCLUSION=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.conclusion // ""')
+          fi
+          echo "healing run $RUN_ID (concluded $CONCLUSION)"
 
           STATUS=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.status')
           if [ "$STATUS" != "completed" ]; then
-            echo "latest run $RUN_ID still $STATUS — nothing to do"
+            echo "run $RUN_ID is $STATUS — nothing to do"
             exit 0
           fi
 
-          CONCLUSION=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.conclusion // ""')
           if [ "$CONCLUSION" != "failure" ]; then
-            echo "latest run concluded $CONCLUSION — nothing to rerun (cancelled runs are deliberate)"
+            echo "run concluded $CONCLUSION — nothing to rerun (cancelled runs are deliberate)"
             exit 0
           fi
 
